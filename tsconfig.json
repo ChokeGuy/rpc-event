@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+      "baseUrl": "./",
+      "emitDecoratorMetadata": true,
+      "resolveJsonModule": true,
+      "esModuleInterop": true,
+      "experimentalDecorators": true,
+      "importHelpers": true,
+      "module": "commonjs",
+      "outDir": "dist",
+      "removeComments": true,
+      "sourceMap": true,
+      "strict": true,
+      "target": "es6",
+      "typeRoots": ["./@types", "./node_modules/@types"],
+      "moduleResolution": "node",
+      "types": ["node"],
+      "paths": {
+          "@shared/*": ["src/shared/*"],
+          "@config/*": ["./src/config/*"],
+          "@api/*": ["./src/api/*"],
+          "@domain/*": ["./src/domain/*"]
+      }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["k8s", "node_modules"]
+}
+
