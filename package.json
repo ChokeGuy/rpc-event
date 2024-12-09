@@ -1,0 +1,22 @@
+{
+  "name": "rpc-event",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChokeGuy/rpc-event.git"
+  },
+  "author": "Thang Nguyen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChokeGuy/rpc-event/issues"
+  },
+  "homepage": "https://github.com/ChokeGuy/rpc-event#readme",
+  "devDependencies": {
+    "hardhat": "^2.22.17"
+  }
+}
