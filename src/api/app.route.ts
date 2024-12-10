@@ -1,8 +1,8 @@
 import express from "express";
 
-import healthCheckRouter from "./event/event.route";
+import eventRouter from "./event/event.route";
 
 const router = express.Router();
-router.use("/event", healthCheckRouter);
+router.use("/event", eventRouter);
 
 export default router;

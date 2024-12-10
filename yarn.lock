@@ -3375,6 +3375,7 @@ tapable@^2.2.0:
     lodash "^4.17.21"
     mongoose "^8.8.4"
     morgan "^1.10.0"
+    redis "^4.7.0"
     template_typescript "file:"
     tslib "^2.8.1"
     uuid "^11.0.3"
