@@ -1,17 +1,23 @@
 import { start } from "./http-connection";
-const PROVIDER_URLS = process.env.SEPOLIA_PROVIDER_URL!;
 import { network } from "hardhat";
+import { contractABI } from "../constants";
 
+import env from "../config/index";
 import "../domain/db/init.redis";
-import { ContractABI } from "../types";
 
 async function main() {
   const chainId = network.config.chainId!;
-  const contractAddress = "";
-  const providerUrls = PROVIDER_URLS.split(",");
-  const contractAbi: ContractABI = [];
+  const contractAddress = env.bsContractAddress;
+  const providerUrls = env.bsProviderUrls
+    .replace(/[\[\]']/g, "")
+    .split(",")
+    .map((url) => url.trim());
 
-  await start(providerUrls, chainId, contractAddress, contractAbi);
+  console.log("ChainId: ", chainId);
+  console.log("Contract Address: ", contractAddress);
+  console.log("Provider Urls: ", providerUrls);
+
+  await start(providerUrls, chainId, contractAddress, contractABI);
 }
 
 main().catch(console.error);

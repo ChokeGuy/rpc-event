@@ -12,7 +12,7 @@ import { RedisClientType } from "redis";
 require("dotenv").config();
 
 const POLLING_INTERVAL = 12 * 1000;
-const RESCAN_BLOCK = 3;
+const RESCAN_BLOCK = 5;
 
 class ResilientHttpProvider {
   private provider: JsonRpcProvider | null = null;
@@ -64,6 +64,9 @@ class ResilientHttpProvider {
         this.blockScan = await getBlockScan();
 
         const currentBlock = await this.provider?.getBlockNumber()!;
+        console.log(
+          `Start polling from block ${this.blockScan} to block ${currentBlock}:`
+        );
 
         //currentBlock: 20 -> [19,18,17]
         //currentBlock: 21 -> [20,19,18]
@@ -71,6 +74,8 @@ class ResilientHttpProvider {
           { length: RESCAN_BLOCK },
           (_, i) => currentBlock - 1 - i
         );
+
+        console.log("Rescan blocks:", blocksToRescan);
 
         await Promise.all(
           blocksToRescan.map(async (blockNumber) => {
@@ -80,9 +85,13 @@ class ResilientHttpProvider {
             );
 
             if (!cachedEvents) return;
+            console.log("Block number:", blockNumber);
             await this.reScanEvents(blockNumber, cachedEvents, index);
           })
         );
+
+        if (currentBlock - this.blockScan > 50000)
+          this.blockScan = currentBlock - 50000;
 
         await this.scanEvents({
           blockStart: this.blockScan,
@@ -110,43 +119,24 @@ class ResilientHttpProvider {
 
       const currentEvents = await this.getEventsByLogs(logs);
 
+      console.log(
+        `New events from block ${blockRange.blockStart} to block ${blockRange.blockEnd}`
+      );
+      console.log("New events: " + JSON.stringify(currentEvents));
+
       await Promise.all(
         currentEvents.map(async (event) => {
           await api.createEvent(event);
+
+          if (event.blockNumber >= blockRange.blockEnd - RESCAN_BLOCK) {
+            const index = blockRange.blockEnd - event.blockNumber + 1;
+            const eventKey = `events_pre_${index}_block`;
+            await this.redis.sAdd(eventKey, JSON.stringify(event));
+          }
         })
       );
-
-      await this.addEventsToRedis({
-        blockStart: blockRange.blockEnd - RESCAN_BLOCK + 1,
-        blockEnd: blockRange.blockEnd,
-      });
     } catch (error) {
       console.error("Error checking events:", error);
-    }
-  }
-
-  private async addEventsToRedis(blockRange: BlockRange) {
-    try {
-      const filter = {
-        fromBlock: blockRange.blockStart,
-        toBlock: blockRange.blockEnd,
-        address: this.contractAddress,
-        topics: this.topics,
-      };
-
-      const logs = await this.provider?.getLogs(filter)!;
-
-      const currentEvents = await this.getEventsByLogs(logs);
-
-      await Promise.all(
-        currentEvents.map(async (event) => {
-          const index = blockRange.blockEnd - event.blockNumber + 1;
-          const eventKey = `events_pre_${index}_block`;
-          await this.redis.sAdd(eventKey, JSON.stringify(event));
-        })
-      );
-    } catch (err) {
-      console.error("Error adding events to redis:", err);
     }
   }
 
@@ -178,14 +168,18 @@ class ResilientHttpProvider {
     return currentEvents;
   }
 
-  private decodeEventData(
-    data: string,
-    topics: readonly string[]
-  ): Result | undefined {
+  private decodeEventData(data: string, topics: readonly string[]) {
     try {
       const iface = new ethers.Interface(this.contractAbi);
       const decoded = iface.parseLog({ topics, data });
-      return decoded?.args;
+      if (decoded && decoded.args) {
+        const result: { [key: string]: any } = {};
+        decoded.fragment.inputs.forEach((input, index) => {
+          result[input.name] = decoded.args[index];
+        });
+
+        return result;
+      }
     } catch (error) {
       console.error("Failed to decode event data:", error);
     }
@@ -207,7 +201,11 @@ class ResilientHttpProvider {
 
       const currentEvents = await this.getEventsByLogs(logs);
 
+      console.log("Current Events", JSON.stringify(currentEvents));
+
       const cachedEventSets = new Set(cachedEvents);
+
+      console.log("Cached Events", JSON.stringify(cachedEvents));
 
       const newEvents = currentEvents.filter(
         (event) => !cachedEventSets.has(JSON.stringify(event))
@@ -219,8 +217,8 @@ class ResilientHttpProvider {
             await api.createEvent(event);
           })
         );
-        await this.redis.del(`events_pre_${index}_block`);
       }
+      await this.redis.del(`events_pre_${index}_block`);
     } catch (error) {
       console.error("Error checking events:", error);
     }

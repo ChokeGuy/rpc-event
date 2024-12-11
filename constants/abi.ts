@@ -18,12 +18,12 @@ const contractABI: ContractABI = [
       },
       {
         indexed: false,
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
+        internalType: "string",
+        name: "message",
+        type: "string",
       },
     ],
-    name: "Transfer",
+    name: "Send",
     type: "event",
   },
 ];

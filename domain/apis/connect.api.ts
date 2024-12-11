@@ -104,11 +104,10 @@ class ApiService {
     }
   }
 }
-
 const apiConfig: ApiConfig = {
-  baseURL: `http://${env.host}/${env.port}/api/v1/event`,
+  baseURL: `http://${env.host}:${env.port}/api/v1/event`,
   timeout: 30000,
-  retryAttempts: 3,
+  retryAttempts: 1,
   retryDelay: 1000,
 };
 
@@ -123,10 +122,10 @@ type ApiEndpoints = {
 
 const api: ApiEndpoints = {
   getEventByBlock: (blockIdentifier: string) =>
-    apiService.get(`/event?block=${blockIdentifier}`),
-  createEvent: (event: Event) => apiService.post("/event", event),
+    apiService.get(`?block=${blockIdentifier}`),
+  createEvent: (event: Event) => apiService.post("/", event),
   getEventByTransaction: (transaction: string) =>
-    apiService.get(`/event/${transaction}`),
+    apiService.get(`/${transaction}`),
   getEventByBlockNumberRange: (blockRange: BlockRange) =>
     apiService.get(
       `/range?blockStart=${blockRange.blockStart}&blockEnd=${blockRange.blockEnd}`
