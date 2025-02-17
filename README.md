@@ -23,7 +23,7 @@ Follow these steps to set up and run the RPC Event Service on your local machine
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/your-username/rpc-event-service.git
+   git clone https://github.com/your-username/rpc-event-apis.git
 2. **Navigate to the project directory**
 
 ```bash
