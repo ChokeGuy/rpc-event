@@ -14,9 +14,6 @@ RPC Event Service is a Node.js application that listens for and processes events
 
 - **Node.js**: JavaScript runtime for building the backend.
 - **Express.js**: Lightweight web framework for building RESTful APIs and handling HTTP requests.
-- **Ethers.js**: Blockchain libraries for interacting with EVM-compatible blockchains.
-- **RPC**: Remote procedure calls to listen for events emitted by smart contracts.
-- **dotenv**: For loading environment variables from a `.env` file.
 - **MongoDB (Optional)**: For storing event logs, if required.
 
 ## Installation
